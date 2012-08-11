@@ -111,7 +111,8 @@ class CliTest < Test::Unit::TestCase
 
   def test_register_global_project
     @app.register_global_project
-    assert_equal [@dir], @app.global_projects
+    assert_equal File.basename(@dir), @app.global_projects[0].name
+    assert_equal @dir, @app.global_projects[0].path
   end
 
   private

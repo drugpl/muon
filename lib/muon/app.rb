@@ -1,65 +1,59 @@
 require "time"
 require "muon/config"
 require "muon/entry"
-require "muon/history"
+require "muon/format"
+require "muon/project"
 
 module Muon
   class App
     def initialize(working_dir, home_dir = ENV["HOME"], output = $stdout)
-      @working_dir = working_dir;
-      @home_dir = home_dir;
-      @history = History.new(muon_dir)
+      @working_dir = working_dir
+      @home_dir = home_dir
       @output = output
+      @project = Project.new(working_dir)
       @config = Config.new(config_file, global_config_file)
     end
 
-    def init_directory(*args)
-      raise "Already initialized!" if Dir.exists?(muon_dir)
-      Dir.mkdir(muon_dir)
-      Dir.mkdir(File.join muon_dir, "objects")
+    attr_reader :project
+
+    def init_directory
+      project.init_directory
     end
 
     def start_tracking(start_time = nil)
-      raise "Already tracking!" if tracking_file_exists?
-      start_time = start_time.nil? ? Time.now : Time.parse(start_time)
-      create_tracking_file(start_time.to_s)
+      start_time = Time.parse(start_time) if start_time
+      project.start_tracking(start_time)
     end
 
     def stop_tracking(end_time = nil)
-      raise "Not tracking!" unless tracking_file_exists?
-      start_time = Time.parse(read_tracking_file)
-      end_time = end_time.nil? ? Time.now : Time.parse(end_time)
-      commit_entry(start_time.to_s, end_time.to_s)
-      delete_tracking_file
+      end_time = Time.parse(end_time) if end_time
+      project.stop_tracking(end_time)
     end
 
     def abort_tracking
-      raise "Not tracking!" unless tracking_file_exists?
-      delete_tracking_file
+      project.abort_tracking
     end
 
     def commit_entry(start_time, end_time)
       start_time = Time.parse(start_time)
       end_time = Time.parse(end_time)
-      entry = Entry.new(start_time, end_time)
-      history.append(entry)
+      project.commit_entry(start_time, end_time)
     end
 
     def show_status
-      if tracking_file_exists?
-        elapsed_seconds = Time.now - Time.parse(read_tracking_file)
-        @output.puts "Time tracking is running since #{format_duration elapsed_seconds.to_i}."
+      if @project.tracking?
+        @output.puts "Time tracking is running since #{Format.duration @project.tracking_duration}."
       else
         @output.puts "Time tracking is stopped."
       end
-      @output.puts "Today's total time is #{format_duration today_total_time}."
+      @output.puts "Today's total time is #{Format.duration @project.today_total_time}."
     end
 
     def show_log(limit = nil)
-      entries = history.entries
+      entries = @project.history_entries
       entries = entries.take(limit) if limit
       entries.each do |entry|
-        @output.puts "#{entry.start_time} - #{entry.end_time} (#{format_duration entry.duration})"
+        @output.puts "#{entry.start_time} - #{entry.end_time} (#{Format.duration entry.duration})"
       end
     end
 
@@ -89,7 +83,9 @@ module Muon
     end
 
     def global_projects
-      File.open(global_projects_file, "r") { |f| f.lines.to_a.map(&:strip) }
+      File.open(global_projects_file, "r") do |f|
+        f.lines.to_a.map(&:strip).map { |path| Project.new(path) }
+      end
     end
 
     def register_global_project
@@ -98,34 +94,10 @@ module Muon
 
     private
 
-    attr_reader :history
-
-    def tracking_file
-      File.join(muon_dir, "current")
-    end
-
-    def tracking_file_exists?
-      File.exists?(tracking_file)
-    end
-
-    def read_tracking_file
-      File.open(tracking_file, "r") { |f| f.read }
-    end
-
-    def create_tracking_file(contents = "")
-      File.open(tracking_file, "w") { |f| f.puts(contents) }
-    end
-
-    def delete_tracking_file
-      File.unlink(tracking_file)
-    end
-
-    def muon_dir
-      File.join(@working_dir, ".muon")
-    end
+    # attr_reader :history
 
     def config_file
-      File.join(muon_dir, "config")
+      File.join(project.working_dir, "config")
     end
 
     def global_config_file
@@ -134,28 +106,6 @@ module Muon
 
     def global_projects_file
       File.join(@home_dir, ".muonprojects") if @home_dir
-    end
-
-    def today_total_time
-      today = Time.now.strftime("%Y%m%d")
-      history.entries.select { |e| e.start_time.strftime("%Y%m%d") == today }.map(&:duration).inject(&:+)
-    end
-
-    def format_duration(seconds)
-      seconds ||= 0
-      minutes = seconds / 60
-      if minutes == 0
-        "#{seconds} seconds"
-      else
-        seconds = seconds % 60
-        hours = minutes / 60
-        if hours == 0
-          "#{minutes} minutes, #{seconds} seconds"
-        else
-          minutes = minutes % 60
-          "#{hours} hours, #{minutes} minutes, #{seconds} seconds"
-        end
-      end
     end
   end
 end
