@@ -1,0 +1,85 @@
+#!/usr/bin/env ruby
+$:.unshift File.expand_path(__FILE__ + '/../../lib')
+
+require 'muon'
+require 'muon/app'
+require 'gli'
+
+include GLI
+
+program_desc 'muon tracks your working time'
+version Muon::VERSION
+
+desc 'Set up current directory as muon project'
+command :init do |c|
+  c.action do |global, options, arguments|
+    @app.init_directory(arguments)
+  end
+end
+
+desc 'Start tracking time'
+command :start do |c|
+  c.action do |global, options, arguments|
+    @app.start_tracking(arguments[0])
+  end
+end
+
+desc 'Stop tracking time'
+command :stop do |c|
+  c.action do |global, options, arguments|
+    @app.stop_tracking(arguments[0])
+  end
+end
+
+desc 'Cancel current tracking entry'
+command :abort do |c|
+  c.action do |global, options, arguments|
+    @app.abort_tracking
+  end
+end
+
+desc 'Add complete tracking entry'
+command :commit do |c|
+  c.action do |global, options, arguments|
+    @app.commit_entry(arguments[0], arguments[1])
+  end
+end
+
+desc 'Display tracking status'
+command :status do |c|
+  c.action do |global, options, arguments|
+    @app.show_status
+  end
+end
+
+desc 'Display time entries'
+command :log do |c|
+  c.flag [:n, :"max-count"]
+  c.action do |global, options, arguments|
+    limit = options[:n] ? options[:n].to_i : nil
+    @app.show_log(limit)
+  end
+end
+
+desc 'Get or set config options'
+command :config do |c|
+  c.switch :global
+  c.action do |global, options, arguments|
+    if arguments.length == 1
+      @app.read_config_option(arguments[0], options)
+    elsif arguments.length > 1
+      @app.set_config_option(arguments[0], arguments[1], options)
+    end
+  end
+end
+
+desc 'Register project in ~/.muonprojects'
+command :register do |c|
+  c.action do |global, options, arguments|
+    @app.register_global_project
+  end
+end
+
+@app = Muon::App.new(Dir.pwd)
+
+exit GLI.run(@app.dealiasify(ARGV))

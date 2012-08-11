@@ -1,0 +1,22 @@
+PATH
+  remote: .
+  specs:
+    muon-cli (0.0.1)
+      gli
+
+GEM
+  remote: http://rubygems.org/
+  specs:
+    chronic (0.7.0)
+    delorean (2.0.0)
+      chronic
+    gli (1.6.0)
+    rake (0.9.2.2)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  delorean
+  muon-cli!
+  rake
