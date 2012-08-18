@@ -34,13 +34,13 @@ muon config --global alias.st status
 Bash completion
 ------------
 ```
-source /path/to/muon/extras/muon-prompt.bash
+source /path/to/muon/extras/muon-completion.bash
 ```
 
 Bash prompt
 ------------
 ```
-source /path/to/muon/extras/muon-completion.bash
+source /path/to/muon/extras/muon-prompt.bash
 ```
 Then add `$(__muon_ps1)` somewhere in your $PS1, for example:
 ```
