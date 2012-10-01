@@ -13,7 +13,7 @@ version Muon::VERSION
 desc 'Set up current directory as muon project'
 command :init do |c|
   c.action do |global, options, arguments|
-    @app.init_directory(arguments)
+    @app.init_directory
   end
 end
 
