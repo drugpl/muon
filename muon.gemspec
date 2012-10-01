@@ -15,7 +15,7 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
   gem.version       = Muon::VERSION
 
-  gem.add_dependency('gli')
+  gem.add_dependency('gli', "~> 1.0")
 
   gem.add_development_dependency('rake')
   gem.add_development_dependency('delorean')
