@@ -29,7 +29,7 @@ module Muon
     end
 
     def head
-      @head ||= if File.exists?(head_file)
+      if File.exists?(head_file)
         File.read(head_file).strip
       else
         nil
@@ -37,7 +37,6 @@ module Muon
     end
 
     def head=(hash)
-      @head = hash
       File.open(head_file, "w") { |f| f.write(hash + "\n") }
     end
 
