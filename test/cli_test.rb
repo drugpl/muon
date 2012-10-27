@@ -107,6 +107,30 @@ class CliTest < Test::Unit::TestCase
     assert_equal 1, @output.string.lines.to_a.length
   end
 
+  def test_goal_for_month
+    time_travel_to("2012-08-01") do
+      @app.commit_entry("00:00", "00:05")
+      @app.commit_entry("00:10", "00:20")
+
+      test_command do
+        @app.show_goal
+        assert_equal "No goal has been set.\n", output
+      end
+
+      test_command do
+        @app.set_goal('30:00:00')
+        assert_equal "Setting goal for this month to 30 hours, 0 minutes, 0 seconds.\n", output
+      end
+
+      test_command do
+        @app.show_goal
+        assert_equal "The goal for this month is 30 hours, 0 minutes, 0 seconds.\n", output_lines[0]
+        assert_equal "Time left to achieve this goal: 29 hours, 45 minutes, 0 seconds.\n", output_lines[1]
+        assert_equal 2, output_lines.length
+      end
+    end
+  end
+
   def test_config_setting_and_reading
     @app.set_config_option("alias.ci", "commit")
 
@@ -131,7 +155,20 @@ class CliTest < Test::Unit::TestCase
 
   private
 
+  def test_command
+    yield
+    reset_output
+  end
+
   def reset_output
     @output.string = ""
+  end
+
+  def output
+    @output.string
+  end
+
+  def output_lines
+    @output.string.lines.to_a
   end
 end

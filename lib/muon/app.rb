@@ -1,4 +1,5 @@
 require "time"
+require "chronic_duration"
 require "muon/config"
 require "muon/entry"
 require "muon/format"
@@ -64,6 +65,21 @@ module Muon
       entries.each do |entry|
         @output.puts "#{entry.start_time} - #{entry.end_time} (#{Format.duration entry.duration})"
       end
+    end
+
+    def show_goal
+      if project.has_goal?
+        @output.puts "The goal for this month is #{Format.duration project.goal}."
+        @output.puts "Time left to achieve this goal: #{Format.duration project.goal_remaining_time}."
+      else
+        @output.puts "No goal has been set."
+      end
+    end
+
+    def set_goal(duration)
+      duration = ChronicDuration.parse(duration)
+      project.goal = duration
+      @output.puts "Setting goal for this month to #{Format.duration duration}."
     end
 
     def dealiasify(args)

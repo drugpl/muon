@@ -68,6 +68,17 @@ command :log do |c|
   end
 end
 
+desc 'Set or see goal for current month'
+command :goal do |c|
+  c.action do |global, options, arguments|
+    if arguments.length == 0
+      @app.show_goal
+    elsif arguments.length > 0
+      @app.set_goal(arguments[0])
+    end
+  end
+end
+
 desc 'Get or set config options'
 command :config do |c|
   c.switch :global

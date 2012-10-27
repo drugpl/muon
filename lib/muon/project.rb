@@ -59,9 +59,30 @@ module Muon
       history.entries
     end
 
-    def day_total_time(date)
+    def day_total_time(date = Time.now)
       date = date.strftime("%Y%m%d")
       history.entries.select { |e| e.start_time.strftime("%Y%m%d") == date }.map(&:duration).inject(&:+)
+    end
+
+    def month_total_time(date = Time.now)
+      date = date.strftime("%Y%m")
+      history.entries.select { |e| e.start_time.strftime("%Y%m") == date }.map(&:duration).inject(&:+)
+    end
+
+    def has_goal?
+      goal_file_exists?
+    end
+
+    def goal
+      read_goal_file.to_i
+    end
+
+    def goal=(seconds)
+      write_goal_file(seconds.to_s)
+    end
+
+    def goal_remaining_time
+      goal - month_total_time
     end
 
     private
@@ -86,6 +107,22 @@ module Muon
 
     def delete_tracking_file
       File.unlink(tracking_file)
+    end
+
+    def goal_file
+      File.join(working_dir, "goal")
+    end
+
+    def goal_file_exists?
+      File.exists?(goal_file)
+    end
+
+    def read_goal_file
+      File.open(goal_file, "r") { |f| f.read }
+    end
+
+    def write_goal_file(contents = "")
+      File.open(goal_file, "w") { |f| f.puts(contents) }
     end
   end
 end
