@@ -59,9 +59,9 @@ module Muon
       history.entries
     end
 
-    def today_total_time
-      today = Time.now.strftime("%Y%m%d")
-      history.entries.select { |e| e.start_time.strftime("%Y%m%d") == today }.map(&:duration).inject(&:+)
+    def day_total_time(date)
+      date = date.strftime("%Y%m%d")
+      history.entries.select { |e| e.start_time.strftime("%Y%m%d") == date }.map(&:duration).inject(&:+)
     end
 
     private

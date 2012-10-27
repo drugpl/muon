@@ -76,6 +76,20 @@ class CliTest < Test::Unit::TestCase
     assert_equal "Time tracking is stopped.\nToday's total time is 5 minutes, 0 seconds.\n", @output.string
   end
 
+  def test_total_calculates_total_time_for_a_day
+    time_travel_to("2012-01-01 12:00") { @app.start_tracking }
+    time_travel_to("2012-01-01 12:10") { @app.stop_tracking }
+    time_travel_to("2012-01-02 00:00") { @app.start_tracking }
+    time_travel_to("2012-01-02 00:05") { @app.stop_tracking }
+
+    @app.show_total('2012-01-01')
+    assert_equal "Total time on 2012-01-01 is 10 minutes, 0 seconds.\n", @output.string
+
+    reset_output
+    @app.show_total('2012-01-05')
+    assert_equal "Total time on 2012-01-05 is 0 seconds.\n", @output.string
+  end
+
   def test_log_lists_entries
     time_travel_to("2012-08-01") do
       @app.commit_entry("00:01", "00:05")

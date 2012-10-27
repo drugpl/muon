@@ -46,7 +46,16 @@ module Muon
       else
         @output.puts "Time tracking is stopped."
       end
-      @output.puts "Today's total time is #{Format.duration @project.today_total_time}."
+      @output.puts "Today's total time is #{Format.duration @project.day_total_time(Time.now)}."
+    end
+
+    def show_total(date = nil)
+      if date.nil?
+        date = Time.now
+      else
+        date = Time.parse(date)
+      end
+      @output.puts "Total time on #{date.strftime('%Y-%m-%d')} is #{Format.duration @project.day_total_time(date)}."
     end
 
     def show_log(limit = nil)
