@@ -40,7 +40,7 @@ source /path/to/muon/extras/muon-completion.bash
 Bash prompt
 ------------
 ```
-source /path/to/muon/extras/muon-prompt.bash
+source /path/to/muon/extras/muon-prompt.sh
 ```
 Then add `$(__muon_ps1)` somewhere in your $PS1, for example:
 ```
