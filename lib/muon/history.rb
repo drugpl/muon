@@ -1,4 +1,5 @@
 require "digest/sha1"
+require "muon/entry"
 
 module Muon
   class History
@@ -24,44 +25,31 @@ module Muon
 
     private
 
-    def head_file
-      File.join(@working_dir, "HEAD")
-    end
+    attr_reader :working_dir
 
     def head
-      if File.exists?(head_file)
-        File.read(head_file).strip
-      else
-        nil
-      end
+      rev = run "git rev-parse --verify --quiet refs/muon/master"
+      return rev.strip if rev != ""
     end
 
     def head=(hash)
-      File.open(head_file, "w") { |f| f.write(hash + "\n") }
+      run "git update-ref refs/muon/master #{hash}"
     end
 
     def load_entry(hash)
       return nil if hash.nil?
-      File.open(file_for_hash(hash), "r") { |f| Entry.from_s(f.read) }
+      Entry.from_commit(run "git cat-file -p #{hash}")
     end
 
     def save_entry(entry)
-      contents = entry.to_s
-      hash = compute_hash(contents)
-      File.open(file_for_hash(hash), "w") { |f| f.write(contents) }
-      return hash
+      tree = run "cat /dev/null | git mktree"
+      hash = run "git commit-tree #{'-p ' + entry.parent_hash if entry.parent_hash} -m '#{entry.start_time},#{entry.end_time}' #{tree}"
+      return hash.strip
     end
 
-    def file_for_hash(hash)
-      File.join(@working_dir, "objects", hash)
-    end
-
-    def verify_hash(contents, hash)
-      raise "Hash #{hash} does not match contents!" if compute_hash(compute_hash) != hash
-    end
-
-    def compute_hash(contents)
-      Digest::SHA1.hexdigest(contents)
+    def run(cmd)
+      ENV['GIT_DIR'] = working_dir
+      `#{cmd}`
     end
   end
 end

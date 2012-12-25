@@ -37,7 +37,7 @@ class CliTest < Test::Unit::TestCase
     @app.start_tracking
     @app.stop_tracking
     assert ! File.exists?("#{@dir}/.muon/current")
-    assert File.exists?("#{@dir}/.muon/HEAD")
+    assert_has_entries
   end
 
   def test_stop_fails_if_not_tracking_yet
@@ -48,7 +48,7 @@ class CliTest < Test::Unit::TestCase
     @app.start_tracking
     @app.abort_tracking
     assert ! File.exists?("#{@dir}/.muon/current")
-    assert ! File.exists?("#{@dir}/.muon/HEAD")
+    assert_no_entries
   end
 
   def test_commit_creates_history_entry
@@ -170,5 +170,17 @@ class CliTest < Test::Unit::TestCase
 
   def output_lines
     @output.string.lines.to_a
+  end
+
+  def assert_has_entries
+    reset_output
+    @app.show_log
+    assert_not_equal 0, output_lines.length
+  end
+
+  def assert_no_entries
+    reset_output
+    @app.show_log
+    assert_equal 0, output_lines.length
   end
 end

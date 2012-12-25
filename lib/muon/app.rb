@@ -122,7 +122,7 @@ module Muon
     # attr_reader :history
 
     def config_file
-      File.join(project.working_dir, "config")
+      File.join(project.working_dir, "plainconfig")
     end
 
     def global_config_file

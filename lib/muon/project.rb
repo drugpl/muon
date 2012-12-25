@@ -19,8 +19,7 @@ module Muon
 
     def init_directory
       raise "Already initialized!" if Dir.exists?(working_dir)
-      Dir.mkdir(working_dir)
-      Dir.mkdir(File.join working_dir, "objects")
+      `git init --bare #{working_dir}`
     end
 
     def tracking?
