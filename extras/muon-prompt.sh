@@ -1,10 +1,14 @@
 __muon_dir ()
 {
-    if [ -d ".muon" ]; then
-        echo ".muon"
-    else
-        echo ""
-    fi
+    local dir=`pwd`
+    while [ "$dir" != "/" ]; do
+        if [ -d "${dir}/.muon" ]; then
+            echo "${dir}/.muon"
+            return 0
+        else
+            dir=`dirname "$dir"`
+        fi
+    done
 }
 
 __muon_ps1 ()
