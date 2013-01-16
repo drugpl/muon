@@ -22,16 +22,16 @@ module Muon
       FileUtils.mkdir_p(@muon_dot)
       Dir.chdir(@muon_dot) do
         puts `git init`
-        puts `git symbolic-ref HEAD refs/heads/#{email}`
+        puts `git symbolic-ref HEAD refs/heads/#{branch_name}`
         puts `rm -f .git/index`
         puts `git clean -fdx`
-        puts `mkdir tracking && touch tracking/.gitkeep`
+        puts `mkdir -p "tracking/#{email}" && touch "tracking/#{email}/.gitkeep"`
         puts `git add tracking && git commit -m 'Muon tracking for #{email} initialized'`
       end
     end
 
     def email
-      if EMPTY_EMAIL
+      if @email == EMPTY_EMAIL
         guess_email
       else
         @email
@@ -41,11 +41,15 @@ module Muon
     #TODO: Extract go EmailGuesser
     def guess_email
       @guessed_email ||= begin
-        e = `git config user.email`
+        e = `git config user.email`.strip
         # TODO: Guess based on hg and other possibile tools
-        raise UnknownEmail, "Email could not be obtained via git settings" if e.strip.empty?
+        raise UnknownEmail, "Email could not be obtained via git settings" if e.empty?
         e
       end
+    end
+
+    def branch_name
+      "muon-#{email}"
     end
   end
 end

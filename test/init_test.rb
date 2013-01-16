@@ -19,7 +19,7 @@ module Muon
     end
 
     def teardown
-      #FileUtils.remove_entry_secure(@dir)
+      FileUtils.remove_entry_secure(@dir)
     end
   end
 end
