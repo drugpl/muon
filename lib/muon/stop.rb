@@ -17,6 +17,7 @@ module Muon
     end
 
     def call
+      ensure_branch
       FileUtils.mkdir_p(tracking_dir)
       File.open(tracking_filename, "w") {|f| f.puts(string) }
       Dir.chdir(project_dir) do
@@ -55,6 +56,16 @@ module Muon
 
     def branch_name
       "muon-#{email}"
+    end
+
+    def ensure_branch
+      raise Error, "incorrect branch" unless correct_branch?
+    end
+
+    def correct_branch?
+      Dir.chdir(project_dir) do
+        `git rev-parse --abbrev-ref HEAD`.strip == branch_name
+      end
     end
   end
 end
