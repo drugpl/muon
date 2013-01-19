@@ -60,8 +60,8 @@ module Muon
       @autodata ||= begin
         hash   = {}
         hash.merge!(attributes)
-        hash.merge!(encrypted_attributes)
         # TODO: Store encrypted
+        # hash.merge!(encrypted_attributes)
         hash
       end
     end
