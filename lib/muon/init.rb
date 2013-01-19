@@ -3,17 +3,29 @@ require 'pathname'
 
 module Muon
   class Init
-    class Error < StandardError; end
-    class UnknownEmail < Error;  end
-    EMPTY_EMAIL = Object.new
 
     # command_dir ~/projects/projectA, init_dir = command_dir
     # command_dir ~/projects/projectA, init_dir = $HOME
-    def initialize(command_dir = Dir.pwd, init_dir = command_dir, email = EMPTY_EMAIL)
-      @command_dir = command_dir
-      @init_dir    = init_dir
+    class Arguments < Struct.new(:command_dir, :init_dir, :project, :email, :branch)
+      def initialize()
+      end
+    end
+
+    class Error < StandardError; end
+    class UnknownEmail < Error;  end
+
+    attr_reader :project, :command_dir, :init_dir
+
+    def initialize(arguments)
+      @arguments    = arguments
+
+      @command_dir  = arguments.command_dir or raise "Missing command dir"
+      @init_dir     = arguments.init_dir || command_dir
+      @email        = arguments.email
+      @project      = arguments.project  || guess_project
+      @branch       = arguments.branch
+
       @muon_dot    = Pathname.new(init_dir.to_s).join(".muon")
-      @email       = email
     end
 
     # http://stackoverflow.com/questions/9538328/git-root-branches-how-do-they-work
@@ -22,20 +34,85 @@ module Muon
       FileUtils.mkdir_p(@muon_dot)
       Dir.chdir(@muon_dot) do
         puts `git init`
-        puts `git symbolic-ref HEAD refs/heads/#{branch_name}`
+        puts `git symbolic-ref HEAD refs/heads/#{branch}`
         puts `rm -f .git/index`
         puts `git clean -fdx`
-        puts `mkdir -p "tracking/#{email}" && touch "tracking/#{email}/.gitkeep"`
+        puts `mkdir -p "tracking/" && touch "tracking/.gitkeep"`
+        File.open("config", "w") {|config| config.puts(settings_content) }
+        # TODO. .gitignore config file created ^^
         puts `git add tracking && git commit -m 'Muon tracking for #{email} initialized'`
       end
+
+      #TODO: Register this project in muon list of known projects
+    end
+
+    private
+
+    def settings_content
+      ruby = <<-RUBY
+        # config
+
+        # Optional, Recommended
+        config.email   = "#{email}"
+
+        # Mandatory
+        config.branch  = "#{branch}"
+
+        # Optional, Recommended
+        config.project = "#{project}"
+
+        # Goals, optional:
+
+        config.daily_hours      = Proc.new do |day|
+          8
+        end
+        config.weekly_hours     = Proc.new do |beginning_of_week|
+          40
+        end
+        config.monthly_hours    = Proc.new do |beginning_of_month|
+          160
+        end
+
+        config.daily_revenue    = Proc.new do |day|
+          0
+        end
+        config.weekly_revenue   = Proc.new do |beginning_of_week|
+          0
+        end
+        config.monthly_revenue  = Proc.new do |beginning_of_month|
+          0
+        end
+
+        # algorithm
+
+        config.revenue_algorithm = Proc.new do |start, stop|
+          per_hour = 0
+          hours    = (stop - start) / 3600.0
+          per_hour * hours
+        end
+
+        config.attributes = Proc.new do |start, stop|
+          require 'socket'
+          host = Socket.gethostname
+          {
+            email:    config.email,
+            project:  config.project,
+            hostname: host
+          }
+        end
+
+        config.encrypted_attributes = Proc.new do |start, stop|
+          {
+            revenue: muon.revenue()
+          }
+        end
+
+        config
+      RUBY
     end
 
     def email
-      if @email == EMPTY_EMAIL
-        guess_email
-      else
-        @email
-      end
+      @email || guess_email
     end
 
     #TODO: Extract go EmailGuesser
@@ -48,8 +125,16 @@ module Muon
       end
     end
 
-    def branch_name
-      "muon-#{email}"
+    def guess_project
+      @command_dir.basename
+    end
+
+    def branch
+      @branch || guess_branch
+    end
+
+    def guess_branch
+      "muon-#{project}-#{email}"
     end
   end
 end

@@ -17,6 +17,7 @@ Gem::Specification.new do |gem|
 
   gem.add_dependency('gli', "~> 1.0")
   gem.add_dependency('chronic_duration', "~> 0.9.6")
+  gem.add_dependency('multi_json', "~> 1.5.0")
 
   gem.add_development_dependency('rake')
   gem.add_development_dependency('delorean')

@@ -2,6 +2,7 @@ require 'test_helper'
 require 'tmpdir'
 require 'stringio'
 require 'delorean'
+require 'pathname'
 require 'muon/init'
 
 module Muon
@@ -9,13 +10,19 @@ module Muon
     include Delorean
 
     def setup
-      @dir = Dir.mktmpdir
+      @dir = Pathname.new(Dir.mktmpdir)
     end
 
     def test_initialized
-      i = Init.new(@dir, @dir, "muon@example.org")
+      args             = Init::Arguments.new
+      args.command_dir = @dir
+      args.email       = "muon@example.org"
+
+      i = Init.new(args)
       i.call
-      assert File.directory?(File.join(@dir, ".muon"))
+
+      assert File.directory?(@dir.join(".muon", "tracking"))
+      assert File.file?(@dir.join(".muon", "config"))
     end
 
     def teardown

@@ -9,21 +9,30 @@ module Muon
 
     def setup
       @dir  = Pathname.new(Dir.mktmpdir)
-      i = Init.new(@dir, @dir, @email = "muon@example.org")
+
+      args             = Init::Arguments.new
+      args.command_dir = @dir
+      args.email       = "muon@example.org"
+      i = Init.new(args)
       i.call
+
       @muon = @dir.join ".muon"
     end
 
     def test_stop_generates_tracking_entry
-      s = Stop.new(@muon, @email, {key: "value"})
+      s = Stop.new(@muon, {key: "value"})
       s.call
-      entry = Dir.glob( @muon.join("tracking", @email, Time.now.year.to_s, "%02d" % Time.now.month, "%02d" % Time.now.day, '*') ).first
+      entry = Dir.glob( @muon.join("tracking", Time.now.year.to_s, "%02d" % Time.now.month, "%02d" % Time.now.day, '*') ).first
       entry = Pathname.new(entry)
       hash = MultiJson.load(entry.read)
       assert hash['stop']
       assert hash['start']
       assert hash['duration']
       assert hash['key']
+
+      assert hash['project']
+      assert hash['email']
+      assert hash['hostname']
     end
 
     def teardown
