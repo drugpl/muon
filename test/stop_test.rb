@@ -5,7 +5,7 @@ require 'muon/init'
 require 'muon/stop'
 
 module Muon
-  class InitTest < Test::Unit::TestCase
+  class StopTest < Test::Unit::TestCase
 
     def setup
       @dir  = Pathname.new(Dir.mktmpdir)
