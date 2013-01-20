@@ -64,15 +64,11 @@ module Muon
         end
       end
 
-      puts objects.inspect
-
       objects.each do |entry|
         entry.each do |key, value|
           types[key] ||= value.class
         end
       end
-
-      puts types.inspect
 
       tuples   = objects.map do |hash|
         ary = []
@@ -81,8 +77,6 @@ module Muon
         end
         ary
       end
-
-      puts tuples.inspect
 
       results  = []
       relation = Veritas::Relation.new(types.to_a, tuples)
