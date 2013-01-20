@@ -20,16 +20,16 @@ module Muon
       i.call
 
       [
-        {"city" => "London"},
-        {"city" => "London"},
-        {"city" => "Oslo"}
+        {"ticket" => "#100"},
+        {"ticket" => "#100"},
+        {"ticket" => "#234"}
       ].each do |meta|
         Stop.new(@muon, meta).call
       end
     end
 
     def test_report_test
-      r = Report.new(@muon, 1.day.ago, 1.day.from_now, [], [:city])
+      r = Report.new(@muon, 1.day.ago, 1.day.from_now, [], [:ticket])
       result = r.call
 
       result.each do |r|
