@@ -20,14 +20,6 @@ require 'pathname'
 # --global = --all-branches && --all-projects
 #
 # Na poczatek potrzebuje tylko z tego brancha tego projektu
-# i ja zawsze chce zrobic jakies summary (sumę), jak nie ma zadnego podanego
-# to
-#
-#new_relation = relation.summarize() { |r| r.add(:sum, r.weight.sum) }
-# a jak sa to:
-#new_relation = relation.summarize(relation.project([ :city ])) { |r| r.add(:sum, r.weight.sum) }
-# a jak kilka:
-#new_relation = relation.summarize(relation.project([ :city, :color ])) { |r| r.add(:sum, r.weight.sum) }
 
 module Muon
   class Report
