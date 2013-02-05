@@ -5,8 +5,22 @@ require 'active_support/all'
 require 'multi_json'
 require 'pathname'
 
-# muon report --from=yesterday --to=tomorrow --where=r.project.eq('Project1') --daily --group-by=email --group-by=ticket --key=value
-# remember to yourself.
+# group by
+#  --daily
+#  --weekly
+#  --monthly
+#  --group-by=day,email,ticket
+#  or
+#  --group-by=email --group-by=ticket
+#
+# restrict
+#  muon report --today
+#  muon report --day
+#  muon report --week
+#  muon report --month
+#
+# muon report --from=yesterday --to=tomorrow --where=project.eq('Project1') --daily --group-by=email,ticket key=value
+#
 # you are not building reporting engine
 # anyone can do it using Ruby/Veritas himself if needs something complicated
 #
@@ -15,7 +29,7 @@ require 'pathname'
 # branches= pozwala wybrac inne
 #
 # --all-projects
-# projects=/p1:/p2
+# projects=/p1,/p2
 #
 # --global = --all-branches && --all-projects
 #
