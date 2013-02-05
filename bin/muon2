@@ -9,6 +9,9 @@ include GLI::App
 program_desc 'muon tracks your working time'
 version Muon::VERSION
 
+# GLI hack
+# https://gist.github.com/paneq/4713739
+
 desc 'Set up current directory as muon project'
 command :init do |c|
   c.flag %w(p project), 
