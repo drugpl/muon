@@ -15,9 +15,11 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
   gem.version       = Muon::VERSION
 
-  gem.add_dependency('gli', "~> 1.0")
-  gem.add_dependency('chronic_duration', "~> 0.9.6")
-  gem.add_dependency('multi_json', "~> 1.5.0")
+  gem.add_dependency('gli',               "~> 1.0")
+  gem.add_dependency('chronic_duration',  "~> 0.9.6")
+  gem.add_dependency('multi_json',        "~> 1.5.0")
+  gem.add_dependency('veritas',           "~> 0.0.7")
+  gem.add_dependency('activesupport',     "~> 3.2.9")
 
   gem.add_development_dependency('rake')
   gem.add_development_dependency('delorean')
