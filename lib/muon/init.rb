@@ -7,7 +7,8 @@ module Muon
     # command_dir ~/projects/projectA, init_dir = command_dir
     # command_dir ~/projects/projectA, init_dir = $HOME
     class Arguments < Struct.new(:command_dir, :init_dir, :project, :email, :branch)
-      def initialize()
+      def initialize(_ = nil, _ = nil, _ = nil, _ = nil, _ = nil)
+        super
       end
     end
 
