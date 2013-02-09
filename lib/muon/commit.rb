@@ -1,9 +1,10 @@
 require 'fileutils'
 require 'pathname'
+require 'time'
 require 'multi_json'
 
 module Muon
-  class Stop
+  class Commit
     class ConfigContext
       require 'ostruct'
 
@@ -25,7 +26,7 @@ module Muon
 
     attr_accessor :project_dir, :stop, :start, :metadata
 
-    def initialize(project_dir, metadata = {}, stop = Time.now, start = get_start_time)
+    def initialize(project_dir, metadata, stop, start)
       @project_dir = project_dir
       @start       = start
       @stop        = stop
@@ -100,12 +101,6 @@ module Muon
 
     def tracking_dir
       @tracking_dir ||= Pathname.new(project_dir).join("tracking", start.strftime("%Y/%m/%d") )
-    end
-
-    # TODO. Read from file created by muon start
-    # TODO: Extract
-    def get_start_time
-      Time.now - 300
     end
 
     def branch_name

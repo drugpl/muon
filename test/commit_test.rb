@@ -2,10 +2,10 @@ require 'test_helper'
 require 'tmpdir'
 require 'multi_json'
 require 'muon/init'
-require 'muon/stop'
+require 'muon/commit'
 
 module Muon
-  class StopTest < Test::Unit::TestCase
+  class CommitTest < Test::Unit::TestCase
 
     def setup
       @dir  = Pathname.new(Dir.mktmpdir)
@@ -20,7 +20,7 @@ module Muon
     end
 
     def test_stop_generates_tracking_entry
-      s = Stop.new(@muon, {key: "value"})
+      s = Commit.new(@muon, {key: "value"}, Time.now, Time.now - 300)
       s.call
       entry = Dir.glob( @muon.join("tracking", Time.now.year.to_s, "%02d" % Time.now.month, "%02d" % Time.now.day, '*') ).first
       entry = Pathname.new(entry)

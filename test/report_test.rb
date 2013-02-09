@@ -2,7 +2,7 @@ require 'test_helper'
 require 'tmpdir'
 require 'multi_json'
 require 'muon/init'
-require 'muon/stop'
+require 'muon/commit'
 require 'muon/report'
 require 'active_support/all'
 
@@ -24,7 +24,7 @@ module Muon
         {"ticket" => "#100"},
         {"ticket" => "#234"}
       ].each do |meta|
-        Stop.new(@muon, meta).call
+        Commit.new(@muon, meta, Time.now, Time.now - 300).call
       end
     end
 
@@ -41,7 +41,8 @@ module Muon
     end
 
     def teardown
-      FileUtils.remove_entry_secure(@dir)
+      puts @dir
+      #FileUtils.remove_entry_secure(@dir)
     end
   end
 end

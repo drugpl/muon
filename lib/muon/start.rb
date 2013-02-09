@@ -2,6 +2,8 @@ require 'fileutils'
 require 'pathname'
 require 'multi_json'
 
+require 'muon/current'
+
 module Muon
   class Start
     class Error < StandardError; end
@@ -15,9 +17,7 @@ module Muon
     end
 
     def call
-      current_dir.mkpath
-      raise Error, "Tracking already started" if current_filename.exist?
-      current_filename.open("w") {|f| f.puts(string) }
+      Current.new(project_dir).save(data)
     end
 
     private
@@ -26,23 +26,10 @@ module Muon
       Time.now
     end
 
-    def string
-      MultiJson.dump(data, :pretty => true)
-    end
-
     def data
       {
         start: start.utc.to_s,
       }.merge(metadata)
     end
-
-    def current_filename
-      @current_filename ||= current_dir.join("current")
-    end
-
-    def current_dir
-      @current_dir ||= Pathname.new(project_dir)
-    end
-
   end
 end

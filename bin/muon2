@@ -61,14 +61,23 @@ command :start do |c|
   end
 end
 
-text = <<-LALA
-
 desc 'Stop tracking time'
 command :stop do |c|
   c.action do |global, options, arguments|
-    @app.stop_tracking(arguments[0])
+    
+    require 'muon/commit'
+    require 'muon/current'
+
+    project_dir = Pathname.new(Dir.pwd).join(".muon") # Fix it later
+    Muon::Current.new(project_dir).ephemeral do |metadata|
+      start       = Time.parse( metadata.delete('start') )
+      Muon::Commit.new(project_dir, metadata, Time.now, start).call
+    end
+
   end
 end
+
+text = <<-LALA
 
 desc 'Cancel current tracking entry'
 command :abort do |c|
