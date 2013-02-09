@@ -20,16 +20,21 @@ module Muon
       i.call
 
       [
-        {"ticket" => "#100"},
-        {"ticket" => "#100"},
-        {"ticket" => "#234"}
+        {"ticket" => "#100", "email" => "robert"},
+        {"ticket" => "#100", "email" => "robert"},
+        {"ticket" => "#234", "email" => "robert"},
+
+        {"ticket" => "#100", "email" => "janek"},
+        {"ticket" => "#234", "email" => "janek"},
+        {"ticket" => "#234", "email" => "janek"},
       ].each do |meta|
         Commit.new(@muon, meta, Time.now, Time.now - 300).call
       end
     end
 
     def test_report_test
-      r = Report.new(@muon, 1.day.ago, 1.day.from_now, [], [:ticket])
+      groups = [:ticket, :email]
+      r = Report.new(@muon, 1.day.ago, 1.day.from_now, [], groups)
       result = r.call
 
       result.each do |r|
@@ -38,6 +43,45 @@ module Muon
         end
         puts
       end
+
+      puts
+      puts "XX"
+
+      lines    = []
+      blah     = result.clone
+      relation = blah.shift
+      headers  = groups.map {|g| relation[g] }
+      puts headers.inspect
+      all      = headers + [ relation[:sum] ]
+      puts all.inspect
+
+      relation.each do |tuple|
+        line = tuple.project(all).to_ary
+        lines << line
+      end
+
+      loop do
+        headers.pop
+        relation = blah.shift
+        break unless headers.present?
+        relation.each do |tuple|
+          found = nil
+          new   = tuple.project(all).to_ary
+          lines.each_with_index do |line, index|
+            if line.first(headers.size) == new.first(headers.size)
+              found = index
+            end
+          end
+
+          lines.insert(found + 1, new)
+        end
+
+      end
+
+      result.last.each{|t| lines << t.project(all).to_ary}
+      puts lines.inspect
+      require 'hirb'
+      puts Hirb::Helpers::AutoTable.render(lines)
     end
 
     def teardown

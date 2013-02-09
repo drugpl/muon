@@ -50,6 +50,7 @@ module Muon
       @from         = from
       @to           = to
       @group_by     = group_by.clone
+      @group_by2    = group_by.clone
     end
 
     def call
@@ -90,8 +91,12 @@ module Muon
       relation = relation.extend { |r| r.add(:week)  {|t| t['start'].beginning_of_week.strftime("W-%Y/%m/%d") } }
       relation = relation.extend { |r| r.add(:month) {|t| t['start'].beginning_of_month.strftime("M-%Y/%m")   } }
 
+
+
       loop do
-        results << relation.summarize( relation.project(group_by) ) { |r| r.add(:sum, r.duration.sum) }
+        results << relation.summarize( relation.project(group_by) ) { |r| r.add(:sum, r.duration.sum) }.sort_by do |r|
+          group_by.map{|g| r.send(g).asc } + [r.sum.asc]
+        end
         break if group_by.size == 0
         group_by.pop
       end
