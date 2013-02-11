@@ -77,6 +77,20 @@ command :stop do |c|
   end
 end
 
+desc 'Display report'
+command :report do |c|
+  c.action do |global, options, arguments|
+    require 'muon/report'
+    require 'muon/report_table'
+    require 'hirb'
+
+    project_dir = Pathname.new(Dir.pwd).join(".muon") # Fix it later
+    result = Muon::Report.new(project_dir, nil, nil, nil, []).call
+    table  = Muon::ReportTable.new(result, []).table
+    puts Hirb::Helpers::AutoTable.render(table)
+  end
+end
+
 text = <<-LALA
 
 desc 'Cancel current tracking entry'
