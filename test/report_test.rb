@@ -4,6 +4,7 @@ require 'multi_json'
 require 'muon/init'
 require 'muon/commit'
 require 'muon/report'
+require 'muon/report_table'
 require 'active_support/all'
 
 module Muon
@@ -79,48 +80,55 @@ module Muon
       total.to_a.first.tap do |row|
         assert_equal 1200.00,    row[:sum]
       end
+    end
+
+    def test_report_table
+      groups = [:ticket, :email]
+      result = Report.new(@muon, 1.day.ago, 1.day.from_now, [], groups).call
+      table  = ReportTable.new(result, groups).table
 
 
-      #return
-
-      puts
-      puts "XX"
-
-      lines    = []
-      blah     = result.clone
-      relation = blah.shift
-      headers  = groups.map {|g| relation[g] }
-      puts headers.inspect
-      all      = headers + [ relation[:sum] ]
-      puts all.inspect
-
-      relation.each do |tuple|
-        line = tuple.project(all).to_ary
-        lines << line
+      table.shift.tap do |row|
+        assert_equal "#100",    row.first
+        assert_equal "janek",   row.second
+        assert_equal 300.00,    row.third
       end
 
-      loop do
-        headers.pop
-        relation = blah.shift
-        break unless headers.present?
-        relation.each do |tuple|
-          found = nil
-          new   = tuple.project(all).to_ary
-          lines.each_with_index do |line, index|
-            if line.first(headers.size) == new.first(headers.size)
-              found = index
-            end
-          end
-
-          lines.insert(found + 1, new)
-        end
-
+      table.shift.tap do |row|
+        assert_equal "#100",    row.first
+        assert_equal "robert",  row.second
+        assert_equal 300.00,    row.third
       end
 
-      result.last.each{|t| lines << t.project(all).to_ary}
-      puts lines.inspect
-      require 'hirb'
-      puts Hirb::Helpers::AutoTable.render(lines)
+      table.shift.tap do |row|
+        assert_equal "#100",    row.first
+        assert_equal nil,       row.second
+        assert_equal 600.00,    row.third
+      end
+
+      table.shift.tap do |row|
+        assert_equal "#234",    row.first
+        assert_equal "janek",   row.second
+        assert_equal 300.00,    row.third
+      end
+
+      table.shift.tap do |row|
+        assert_equal "#234",    row.first
+        assert_equal "robert",  row.second
+        assert_equal 300.00,    row.third
+      end
+
+      table.shift.tap do |row|
+        assert_equal "#234",    row.first
+        assert_equal nil,       row.second
+        assert_equal 600.00,    row.third
+      end
+
+      table.shift.tap do |row|
+        assert_equal nil,       row.first
+        assert_equal nil,       row.second
+        assert_equal 1200.00,   row.third
+      end
     end
 
     def teardown
