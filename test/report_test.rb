@@ -28,21 +28,60 @@ module Muon
         {"ticket" => "#234", "email" => "janek"},
         {"ticket" => "#234", "email" => "janek"},
       ].each do |meta|
-        Commit.new(@muon, meta, Time.now, Time.now - 300).call
+        Commit.new(@muon, meta, t = Time.now, t - 300).call
       end
     end
 
     def test_report_test
       groups = [:ticket, :email]
-      r = Report.new(@muon, 1.day.ago, 1.day.from_now, [], groups)
+      r      = Report.new(@muon, 1.day.ago, 1.day.from_now, [], groups)
       result = r.call
 
-      result.each do |r|
-        r.each do |t|
-          puts t.inspect
-        end
-        puts
+      assert_equal 3, result.size
+      ticket_email = result.first
+      ticket       = result.second
+      total        = result.third
+
+      ticket_email.to_a.first.tap do |row|
+        assert_equal "#100",    row[:ticket]
+        assert_equal "janek",   row[:email]
+        assert_equal 300.00,    row[:sum]
       end
+
+      ticket_email.to_a.second.tap do |row|
+        assert_equal "#100",    row[:ticket]
+        assert_equal "robert",  row[:email]
+        assert_equal 300.00,    row[:sum]
+      end
+
+      ticket_email.to_a.third.tap do |row|
+        assert_equal "#234",    row[:ticket]
+        assert_equal "janek",   row[:email]
+        assert_equal 300.00,    row[:sum]
+      end
+
+      ticket_email.to_a.fourth.tap do |row|
+        assert_equal "#234",    row[:ticket]
+        assert_equal "robert",  row[:email]
+        assert_equal 300.00,    row[:sum]
+      end
+
+      ticket.to_a.first.tap do |row|
+        assert_equal "#100",    row[:ticket]
+        assert_equal 600.00,    row[:sum]
+      end
+
+      ticket.to_a.second.tap do |row|
+        assert_equal "#234",    row[:ticket]
+        assert_equal 600.00,    row[:sum]
+      end
+
+      total.to_a.first.tap do |row|
+        assert_equal 1200.00,    row[:sum]
+      end
+
+
+      #return
 
       puts
       puts "XX"
