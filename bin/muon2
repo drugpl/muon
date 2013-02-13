@@ -91,6 +91,31 @@ command :report do |c|
   end
 end
 
+desc 'Display tracking status'
+command :status do |c|
+  c.action do |global, options, arguments|
+    require 'muon/current'
+    require 'muon/commit'
+    require 'muon/format'
+    require 'muon/report'
+
+    project_dir = Pathname.new(Dir.pwd).join(".muon") # Fix it later
+    current     = Muon::Current.new(project_dir)
+    metadata    = current.read
+    # TODO: Check if initialized
+    if current.tracking?
+      start     = Time.parse( metadata.delete('start') )
+      commit    = Muon::Commit.new(project_dir, metadata, Time.now, start)
+      data      = commit.data
+      duration  = data[:duration]
+      puts "Time tracking is running since #{Muon::Format.duration(duration)}."
+    else
+      puts "Time tracking is stopped."
+    end
+  end
+end
+
+
 text = <<-LALA
 
 desc 'Cancel current tracking entry'
@@ -104,13 +129,6 @@ desc 'Add complete tracking entry'
 command :commit do |c|
   c.action do |global, options, arguments|
     @app.commit_entry(arguments[0], arguments[1])
-  end
-end
-
-desc 'Display tracking status'
-command :status do |c|
-  c.action do |global, options, arguments|
-    @app.show_status
   end
 end
 

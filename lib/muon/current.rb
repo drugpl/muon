@@ -15,7 +15,7 @@ module Muon
 
     def save(data)
       current_dir.mkpath
-      raise Error, "Tracking already started" if current_filename.exist?
+      raise Error, "Tracking already started" if tracking?
       current_filename.open("w") {|f| f.puts(string(data)) }
     end
 
@@ -26,6 +26,10 @@ module Muon
     def ephemeral(&block)
       yield read
       current_filename.delete
+    end
+
+    def tracking?
+      current_filename.exist?
     end
 
     private
