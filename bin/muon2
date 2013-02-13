@@ -101,9 +101,9 @@ command :status do |c|
 
     project_dir = Pathname.new(Dir.pwd).join(".muon") # Fix it later
     current     = Muon::Current.new(project_dir)
-    metadata    = current.read
     # TODO: Check if initialized
     if current.tracking?
+      metadata  = current.read
       start     = Time.parse( metadata.delete('start') )
       commit    = Muon::Commit.new(project_dir, metadata, Time.now, start)
       data      = commit.data
@@ -112,6 +112,8 @@ command :status do |c|
     else
       puts "Time tracking is stopped."
     end
+
+    #TODO: Display today's total time
   end
 end
 
