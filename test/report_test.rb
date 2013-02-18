@@ -45,10 +45,23 @@ module Muon
 
       r      = Report.new(@muon, from, to, [], groups)
       result = r.call
-      puts result.inspect
 
       result.first.to_a.first.tap do |row|
         assert_equal 900.00,    row[:sum]
+      end
+    end
+
+    def test_empty_results
+      groups = []
+
+      from   = Time.new(2345)
+      to     = Time.new(2346)
+
+      r      = Report.new(@muon, from, to, [], groups)
+      result = r.call
+
+      result.first.to_a.first.tap do |row|
+        assert_equal 0,    row[:sum]
       end
     end
 
