@@ -108,12 +108,20 @@ command :status do |c|
       commit    = Muon::Commit.new(project_dir, metadata, Time.now, start)
       data      = commit.data
       duration  = data[:duration]
-      puts "Time tracking is running since #{Muon::Format.duration(duration)}."
+      puts "Tracking: #{Muon::Format.duration(duration)}."
     else
-      puts "Time tracking is stopped."
+      puts "Tracking: Stopped"
     end
 
-    #TODO: Display today's total time
+    from        = Date.today.to_time
+    to          = (Date.today + 1).to_time
+    result      = Muon::Report.new(project_dir, from, to, nil, []).call
+    today_sum   = result.first.to_a.first[:sum] rescue 0
+
+    puts "Today:    #{Muon::Format.duration today_sum}."
+    if current.tracking?
+      puts "Total:    #{Muon::Format.duration today_sum + duration}."
+    end
   end
 end
 
