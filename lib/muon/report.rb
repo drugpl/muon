@@ -87,11 +87,11 @@ module Muon
 
       results  = []
       relation = Veritas::Relation.new(types.to_a, tuples)
-      relation = relation.extend { |r| r.add(:day)   {|t| t['start'].to_date } }
-      relation = relation.extend { |r| r.add(:week)  {|t| t['start'].beginning_of_week.strftime("W-%Y/%m/%d") } }
-      relation = relation.extend { |r| r.add(:month) {|t| t['start'].beginning_of_month.strftime("M-%Y/%m")   } }
-
-
+      relation = relation.extend   { |r| r.add(:day)   {|t| t['start'].to_date } }
+      relation = relation.extend   { |r| r.add(:week)  {|t| t['start'].beginning_of_week.strftime("W-%Y/%m/%d") } }
+      relation = relation.extend   { |r| r.add(:month) {|t| t['start'].beginning_of_month.strftime("M-%Y/%m")   } }
+      relation = relation.restrict { |r| r.start.gte from } if from
+      relation = relation.restrict { |r| r.stop.lte to }    if to
 
       loop do
         results << relation.summarize( relation.project(group_by) ) { |r| r.add(:sum, r.duration.sum) }.sort_by do |r|
