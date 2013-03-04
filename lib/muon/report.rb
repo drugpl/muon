@@ -46,6 +46,7 @@ module Muon
     #  * weekly
     #  * monthly
     def initialize(project_dir, from, to, restrictions, group_by)
+      group_by      = group_by.map(&:to_s)
       @project_dir  = project_dir
       @from         = from
       @to           = to
@@ -75,6 +76,10 @@ module Muon
         entry.each do |key, value|
           types[key] ||= value.class
         end
+      end
+
+      group_by.each do |key|
+        types[key] ||= String
       end
 
       tuples   = objects.map do |hash|

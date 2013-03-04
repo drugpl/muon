@@ -37,6 +37,28 @@ module Muon
       end
     end
 
+    def test_group_by_unexisting
+      groups = [:pivotal]
+
+      from   = 1.day.ago
+      to     = 1.day.from_now
+
+      r      = Report.new(@muon, from, to, [], groups)
+      result = r.call
+
+      result.first.to_a.first.tap do |row|
+        assert_equal 1800.00,    row[:sum]
+        assert_nil               row[:pivotal]
+      end
+
+      result.second.to_a.first.tap do |row|
+        assert_equal 1800.00,    row[:sum]
+        assert_raises(KeyError) do
+          row[:pivotal]
+        end
+      end
+    end
+
     def test_report_filtering
       groups = []
 
@@ -51,6 +73,7 @@ module Muon
       end
     end
 
+    # TODO: Failing
     def test_empty_results
       groups = []
 
