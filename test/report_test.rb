@@ -37,6 +37,36 @@ module Muon
       end
     end
 
+    # https://github.com/dkubb/veritas/issues/26
+    def test_group_by_unexisting_and_existing
+      t   = Time.new(now.year, now.month, now.day, 10)
+      Commit.new(@muon, {"pivotal" => "11223344"}, t + 300, t).call
+
+      groups = [:pivotal]
+      from   = 1.day.ago
+      to     = 1.day.from_now
+
+      r      = Report.new(@muon, from, to, [], groups)
+      result = r.call
+
+      result.first.to_a.first.tap do |row|
+        assert_equal 300.00,     row[:sum]
+        assert_equal "11223344", row[:pivotal]
+      end
+
+      result.first.to_a.second.tap do |row|
+        assert_equal 1800.00,    row[:sum]
+        assert_nil               row[:pivotal]
+      end
+
+      result.second.to_a.first.tap do |row|
+        assert_equal 2100.00,    row[:sum]
+        assert_raises(KeyError) do
+          row[:pivotal]
+        end
+      end
+    end
+
     def test_group_by_unexisting
       groups = [:pivotal]
 

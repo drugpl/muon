@@ -35,6 +35,19 @@ require 'pathname'
 #
 # Na poczatek potrzebuje tylko z tego brancha tego projektu
 
+# https://github.com/dkubb/veritas/issues/26
+Veritas::Relation::Operation::Order::Ascending.class_eval do
+  def self.call(left, right)
+    left <=> right || (-1 if right.nil?) || (1 if left.nil?)
+  end
+end
+Veritas::Relation::Operation::Order::Descending.class_eval do
+  def self.call(left, right)
+    left, right = right, left
+    left <=> right || (-1 if right.nil?) || (1 if left.nil?)
+  end
+end
+
 module Muon
   class Report
 
