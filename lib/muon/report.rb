@@ -67,9 +67,8 @@ module Muon
       @group_by2    = group_by.clone
     end
 
-    def call
+    def all_objects
       objects = []
-      types   = {}
       Dir.chdir(project_dir) do
         Dir.glob("tracking/**/*") do |path|
           path  = Pathname.new(path)
@@ -79,11 +78,19 @@ module Muon
           entry = MultiJson.load(json)
           entry['start'] = Time.parse(entry['start']) if entry['start']
           entry['stop']  = Time.parse(entry['stop'])  if entry['stop']
-          entry['duration'] ||= entry['stop'] - entry['start']
+          entry['duration'] ||= (entry['stop'] - entry['start']) / 3600.0
+          entry['path'] = path.to_s
+          #entry['duration'] = entry['duration'] / 3600.0
 
           objects << entry
         end
       end
+      objects
+    end
+
+    def call
+      objects = all_objects
+      types   = {}
 
       objects.each do |entry|
         entry.each do |key, value|
