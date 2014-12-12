@@ -50,6 +50,7 @@ command :start do |c|
     require 'muon/start'
 
     project_dir = Pathname.new(Dir.pwd).join(".muon") # Fix it later
+    raise "This is not muon directory" if !Dir.exists?(project_dir)
     metadata = arguments.inject({}) do |hash, arg|
       key, value = arg.split(":", 2)
       raise 'Metadata must follow "key:value" convention' if key.nil? || value.nil? || key.empty? || value.empty?
