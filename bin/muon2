@@ -74,6 +74,19 @@ command :rebase do |c|
   end
 end
 
+desc 'Checkout branch'
+command :checkout do |c|
+  c.action do |global, options, arguments|
+    project_dir = Pathname.new(Dir.pwd).join(".muon") # Fix it later
+
+    raise "You have to specify branch name" if arguments.empty?
+    Dir.chdir(project_dir) do
+      rebasing_branch = arguments.first
+      `git checkout #{rebasing_branch}`
+    end
+  end
+end
+
 desc 'Stop tracking time'
 command :stop do |c|
   c.action do |global, options, arguments|
