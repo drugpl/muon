@@ -133,8 +133,10 @@ end
 desc 'Display tracking status'
 command :status do |c|
   c.action do |global, options, arguments|
+    require 'muon/muon_path_finder'
     require 'muon/commands/status'
-    Muon::Commands::Status.new.call
+    project_dir = Muon::MuonPathFinder.new.call
+    Muon::Commands::Status.new(project_dir).call
   end
 end
 

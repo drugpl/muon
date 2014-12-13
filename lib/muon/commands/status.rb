@@ -7,39 +7,41 @@ require 'muon/muon_path_finder'
 module Muon
   module Commands
     class Status
-      def call
-        project_dir = Muon::MuonPathFinder.new.call
+      def initialize(project_dir)
+        @project_dir = project_dir
+      end
 
-        current          = Muon::Current.new(project_dir)
-        current_duration = get_current_duration(project_dir, current)
+      def call
+        current          = Muon::Current.new(@project_dir)
+        current_duration = get_current_duration(current)
         print_current_tracking(current, current_duration)
 
         from      = Time.now.beginning_of_day
         to        = Time.now.end_of_day
-        today_sum = get_period_time_sum(project_dir, from, to) + current_duration
+        today_sum = get_period_time_sum(from, to) + current_duration
         print_today_tracking(today_sum)
 
         from     = Time.now.beginning_of_week
         to       = Time.now.end_of_week
-        week_sum = get_period_time_sum(project_dir, from, to) + current_duration
+        week_sum = get_period_time_sum(from, to) + current_duration
         print_week_tracking(week_sum)
 
         from      = Time.now.beginning_of_month
         to        = Time.now.end_of_month
-        month_sum = get_period_time_sum(project_dir, from, to) + current_duration
+        month_sum = get_period_time_sum(from, to) + current_duration
         print_month_tracking(month_sum)
       end
 
-      def get_period_time_sum(project_dir, from, to)
-        result    = Muon::Report.new(project_dir, from, to, nil, []).call
+      def get_period_time_sum(from, to)
+        result    = Muon::Report.new(@project_dir, from, to, nil, []).call
         result.first.to_a.first[:sum] rescue 0
       end
 
-      def get_current_duration(project_dir, current)
+      def get_current_duration(current)
         if current.tracking?
           metadata  = current.read
           start     = Time.parse( metadata.delete('start') )
-          commit    = Muon::Commit.new(project_dir, metadata, Time.now, start)
+          commit    = Muon::Commit.new(@project_dir, metadata, Time.now, start)
           data      = commit.data
           duration  = data[:duration]
         end
