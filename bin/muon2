@@ -109,23 +109,45 @@ end
 
 desc 'Display report'
 command :report do |c|
+  c.desc 'Report only based on entries from today'
+  c.switch [:today]
+
+  c.desc 'Report only based on entries from this week'
+  c.switch [:week]
+
+  c.desc 'Report only based on entries from this month'
+  c.switch [:month]
+
+  c.desc 'Report grouping by days, the same as --group-by=day'
+  c.switch [:daily]
+
+  c.desc 'Report grouping by weeks, the same as --group-by=week'
+  c.switch [:weekly]
+
+  c.desc 'Report grouping by months, the same as --group-by=month'
+  c.switch [:monthly]
+
+  c.desc 'Set grouping by fields, it can be any metadata or: day, week, month'
+  c.flag :"group-by",
+    default_value: ['day'],
+    type: Array
+
+  c.desc 'Report based on data from all branches'
+  c.switch [:"all-branches"]
+
   c.action do |global, options, arguments|
-    require 'muon/report'
+    require 'muon/reporting'
     require 'muon/report_table'
     require 'hirb'
     require 'muon/muon_path_finder'
-
+    require 'muon/commands/report'
 
     begin
-    project_dir = Muon::MuonPathFinder.new.call
-    result = Muon::Report.new(project_dir, nil, nil, nil, []).call
-    table  = Muon::ReportTable.new(result, []).table
-    #result = Muon::Report.new(project_dir, Time.new(2013,6, 1), Time.new(2013,6,30), nil, [:ticket]).call
-    #table  = Muon::ReportTable.new(result, [:ticket]).table
-    puts Hirb::Helpers::AutoTable.render(table)
+      project_dir = Muon::MuonPathFinder.new.call
+      Muon::Commands::Report.new(project_dir, global, options, arguments).call
     rescue => x
       puts x.inspect
-      puts *x.backtrace
+      puts(*x.backtrace)
     end
   end
 end

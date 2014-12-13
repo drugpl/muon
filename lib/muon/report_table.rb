@@ -40,6 +40,5 @@ module Muon
       result.last.each{|t| lines << t.project(all).to_ary}
       lines
     end
-
   end
 end

@@ -36,35 +36,29 @@ require 'pathname'
 # Na poczatek potrzebuje tylko z tego brancha tego projektu
 
 # https://github.com/dkubb/veritas/issues/26
-Veritas::Relation::Operation::Order::Ascending.class_eval do
-  def self.call(left, right)
-    left <=> right || (-1 if right.nil?) || (1 if left.nil?)
-  end
-end
-Veritas::Relation::Operation::Order::Descending.class_eval do
-  def self.call(left, right)
-    left, right = right, left
-    left <=> right || (-1 if right.nil?) || (1 if left.nil?)
-  end
-end
+# Veritas::Relation::Operation::Order::Ascending.class_eval do
+#   def self.call(left, right)
+#     left <=> right || (-1 if right.nil?) || (1 if left.nil?)
+#   end
+# end
+# Veritas::Relation::Operation::Order::Descending.class_eval do
+#   def self.call(left, right)
+#     left, right = right, left
+#     left <=> right || (-1 if right.nil?) || (1 if left.nil?)
+#   end
+# end
 
 module Muon
-  class Report
+  class Reporting
 
     attr_reader :project_dir, :from, :to, :restrictions, :group_by
 
-    # from/to are restrictions which can be often and easily applied to and might have special meanings
-    # group_by are summaries which might have special meaning such as
-    #  * daily
-    #  * weekly
-    #  * monthly
-    def initialize(project_dir, from, to, restrictions, group_by)
-      group_by      = group_by.map(&:to_s)
+    def initialize(project_dir, from, to, restrictions, group_by, all_branches)
+      @all_branches = all_branches
       @project_dir  = project_dir
       @from         = from
       @to           = to
-      @group_by     = group_by.clone
-      @group_by2    = group_by.clone
+      @group_by     = group_by.map(&:to_s)
     end
 
     def all_objects
@@ -78,9 +72,9 @@ module Muon
           entry = MultiJson.load(json)
           entry['start'] = Time.parse(entry['start']) if entry['start']
           entry['stop']  = Time.parse(entry['stop'])  if entry['stop']
-          entry['duration'] ||= (entry['stop'] - entry['start']) / 3600.0
+          entry['duration'] ||= entry['stop'] - entry['start']
           entry['path'] = path.to_s
-          #entry['duration'] = entry['duration'] / 3600.0
+          entry['duration'] = (entry['duration'] / 3600.0).round(3)
 
           objects << entry
         end
@@ -89,7 +83,20 @@ module Muon
     end
 
     def call
-      objects = all_objects
+      objects = []
+      if @all_branches
+        Dir.chdir(project_dir) do
+          branches = `ls .git/refs/heads`.split
+          current_branch = `git rev-parse --abbrev-ref HEAD`.strip
+          objects = branches.map do |branch|
+            `git checkout #{branch}`
+            all_objects
+          end.flatten
+          `git checkout #{current_branch}`
+        end
+      else
+        objects = all_objects
+      end
       types   = {}
 
       objects.each do |entry|
@@ -102,7 +109,11 @@ module Muon
         types[key] ||= String
       end
 
-      tuples   = objects.map do |hash|
+      types.delete("day")
+      types.delete("week")
+      types.delete("month")
+
+      tuples = objects.map do |hash|
         ary = []
         types.keys.each do |k|
           ary << hash[k]
@@ -110,18 +121,23 @@ module Muon
         ary
       end
 
-      results  = []
       relation = Veritas::Relation.new(types.to_a, tuples)
-      relation = relation.extend   { |r| r.add(:day)   {|t| t['start'].to_date } }
-      relation = relation.extend   { |r| r.add(:week)  {|t| t['start'].beginning_of_week.strftime("W-%Y/%m/%d") } }
-      relation = relation.extend   { |r| r.add(:month) {|t| t['start'].beginning_of_month.strftime("M-%Y/%m")   } }
+      relation = relation.extend do |r|
+        r.add(:day)   {|t| t['start'].to_date }
+        r.add(:week)  {|t| t['start'].beginning_of_week.strftime("W-%Y/%m/%d") }
+        r.add(:month) {|t| t['start'].beginning_of_month.strftime("M-%Y/%m")   }
+      end
       relation = relation.restrict { |r| r.start.gte from } if from
       relation = relation.restrict { |r| r.stop.lte to }    if to
 
+      results  = []
       loop do
-        results << relation.summarize( relation.project(group_by) ) { |r| r.add(:sum, r.duration.sum) }.sort_by do |r|
+        summary = relation.summarize( relation.project(group_by) ) do |r|
+          r.add(:sum, r.duration.sum)
+        end.sort_by do |r|
           group_by.map{|g| r.send(g).asc } + [r.sum.asc]
         end
+        results << summary
         break if group_by.size == 0
         group_by.pop
       end
