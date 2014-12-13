@@ -51,7 +51,6 @@ command :start do |c|
     require 'muon/muon_path_finder'
 
     project_dir = Muon::MuonPathFinder.new.call
-    puts project_dir
     raise "This is not muon directory" if !Dir.exists?(project_dir)
     metadata = arguments.inject({}) do |hash, arg|
       key, value = arg.split(":", 2)
@@ -134,35 +133,8 @@ end
 desc 'Display tracking status'
 command :status do |c|
   c.action do |global, options, arguments|
-    require 'muon/current'
-    require 'muon/commit'
-    require 'muon/format'
-    require 'muon/report'
-    require 'muon/muon_path_finder'
-
-    project_dir = Muon::MuonPathFinder.new.call
-    current     = Muon::Current.new(project_dir)
-    # TODO: Check if initialized
-    if current.tracking?
-      metadata  = current.read
-      start     = Time.parse( metadata.delete('start') )
-      commit    = Muon::Commit.new(project_dir, metadata, Time.now, start)
-      data      = commit.data
-      duration  = data[:duration]
-      puts "Tracking: #{Muon::Format.duration(duration)}."
-    else
-      puts "Tracking: Stopped"
-    end
-
-    from        = Date.today.to_time
-    to          = (Date.today + 1).to_time
-    result      = Muon::Report.new(project_dir, from, to, nil, []).call
-    today_sum   = result.first.to_a.first[:sum] rescue 0
-
-    puts "Today:    #{Muon::Format.duration today_sum}."
-    if current.tracking?
-      puts "Total:    #{Muon::Format.duration today_sum + duration}."
-    end
+    require 'muon/commands/status'
+    Muon::Commands::Status.new.call
   end
 end
 
@@ -172,7 +144,6 @@ command :current do |c|
     require 'muon/muon_path_finder'
     project_dir = Muon::MuonPathFinder.new.call
     path_of_current = "#{project_dir}/current"
-    puts path_of_current
 
     if !File.exists?(path_of_current)
       raise "Tracking is currently stopped."
