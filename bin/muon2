@@ -93,6 +93,19 @@ command :stop do |c|
   end
 end
 
+desc 'Switch to the other task'
+command :switch do |c|
+  c.action do |globals, options, args|
+    require 'muon/muon_path_finder'
+    require 'muon/commands/stop'
+    require 'muon/commands/start'
+
+    project_dir = Muon::MuonPathFinder.new.call
+    Muon::Commands::Stop.new(project_dir, globals, options, args).call
+    Muon::Commands::Start.new(project_dir, globals, options, args).call
+  end
+end
+
 desc 'Display report'
 command :report do |c|
   c.desc 'Report only based on entries from today'
