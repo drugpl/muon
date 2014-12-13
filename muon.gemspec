@@ -3,7 +3,7 @@ require File.expand_path('../lib/muon/version', __FILE__)
 
 Gem::Specification.new do |gem|
   gem.authors       = ["DRUG"]
-  # gem.email         = [""]
+  gem.email         = "all@drug.org.pl"
   gem.description   = %q{Distributed time tracking tool}
   gem.summary       = %q{Distributed time tracking tool}
   gem.homepage      = "http://drug.org.pl"
