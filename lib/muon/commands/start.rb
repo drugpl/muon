@@ -1,15 +1,9 @@
 require 'muon/starting'
+require 'muon/commands/command'
 
 module Muon
   module Commands
-    class Start
-      def initialize(project_dir, global_options, options, args)
-        @project_dir    = project_dir
-        @global_options = global_options
-        @options        = options
-        @args           = args
-      end
-
+    class Start < Command
       def call
         metadata = @args.inject({}) do |hash, arg|
           key, value = arg.split(":", 2)
