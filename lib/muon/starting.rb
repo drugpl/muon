@@ -5,7 +5,7 @@ require 'multi_json'
 require 'muon/current'
 
 module Muon
-  class Start
+  class Starting
     class Error < StandardError; end
 
     attr_accessor :project_dir, :start, :metadata

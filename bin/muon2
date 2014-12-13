@@ -46,20 +46,12 @@ end
 
 desc 'Start tracking time'
 command :start do |c|
-  c.action do |global, options, arguments|
-    require 'muon/start'
+  c.action do |globals, options, args|
+    require 'muon/commands/start'
     require 'muon/muon_path_finder'
 
     project_dir = Muon::MuonPathFinder.new.call
-    raise "This is not muon directory" if !Dir.exists?(project_dir)
-    metadata = arguments.inject({}) do |hash, arg|
-      key, value = arg.split(":", 2)
-      raise 'Metadata must follow "key:value" convention' if key.nil? || value.nil? || key.empty? || value.empty?
-      hash[key] = value
-      hash
-    end
-
-    Muon::Start.new(project_dir, metadata).call
+    Muon::Commands::Start.new(project_dir, globals, options, args).call
   end
 end
 
@@ -189,9 +181,10 @@ command :server do |c|
 
     project_dir = Muon::MuonPathFinder.new.call
     require 'muon/server'
-
   end
 end
+
+
 
 desc 'Sync time entries to redmine'
 command :"2redmine" do |c|
