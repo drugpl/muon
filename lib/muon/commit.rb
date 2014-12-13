@@ -2,6 +2,7 @@ require 'fileutils'
 require 'pathname'
 require 'time'
 require 'multi_json'
+require 'securerandom'
 
 module Muon
   class Commit
@@ -96,7 +97,7 @@ module Muon
     end
 
     def tracking_filename
-      @tracking_filename ||= tracking_dir.join( start.strftime("%H%M%S.%L.json") )
+      @tracking_filename ||= tracking_dir.join( start.strftime("%H.%M.%S.") + SecureRandom.hex(2) + ".json" )
     end
 
     def tracking_dir
