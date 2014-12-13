@@ -166,6 +166,26 @@ command :status do |c|
   end
 end
 
+desc 'Edit current tracking file'
+command :current do |c|
+  c.action do |global, options, arguments|
+    require 'muon/muon_path_finder'
+    project_dir = Muon::MuonPathFinder.new.call
+    path_of_current = "#{project_dir}/current"
+    puts path_of_current
+
+    if !File.exists?(path_of_current)
+      raise "Tracking is currently stopped."
+    end
+
+    if ENV['EDITOR'].nil?
+      raise "You don't have specified EDITOR global variable."
+    end
+
+    system("#{ENV['EDITOR']} \"#{path_of_current}\"")
+  end
+end
+
 desc 'Run http server with fancy stats'
 command :server do |c|
   c.action do |global, options, arguments|
