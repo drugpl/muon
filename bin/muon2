@@ -48,8 +48,10 @@ desc 'Start tracking time'
 command :start do |c|
   c.action do |global, options, arguments|
     require 'muon/start'
+    require 'muon/muon_path_finder'
 
-    project_dir = Pathname.new(Dir.pwd).join(".muon") # Fix it later
+    project_dir = Muon::MuonPathFinder.new.call
+    puts project_dir
     raise "This is not muon directory" if !Dir.exists?(project_dir)
     metadata = arguments.inject({}) do |hash, arg|
       key, value = arg.split(":", 2)
@@ -66,7 +68,8 @@ desc 'Rebase branch'
 command :rebase do |c|
   c.action do |global, options, arguments|
     require 'muon/rebase'
-    project_dir = Pathname.new(Dir.pwd).join(".muon") # Fix it later
+    require 'muon/muon_path_finder'
+    project_dir = Muon::MuonPathFinder.new.call
 
 
     raise "You have to specify rebasing branch" if arguments.empty?
@@ -77,7 +80,8 @@ end
 desc 'Checkout branch'
 command :checkout do |c|
   c.action do |global, options, arguments|
-    project_dir = Pathname.new(Dir.pwd).join(".muon") # Fix it later
+    require 'muon/muon_path_finder'
+    project_dir = Muon::MuonPathFinder.new.call
 
     raise "You have to specify branch name" if arguments.empty?
     Dir.chdir(project_dir) do
@@ -93,8 +97,9 @@ command :stop do |c|
     
     require 'muon/commit'
     require 'muon/current'
+    require 'muon/muon_path_finder'
 
-    project_dir = Pathname.new(Dir.pwd).join(".muon") # Fix it later
+    project_dir = Muon::MuonPathFinder.new.call
     Muon::Current.new(project_dir).ephemeral do |metadata|
       start       = Time.parse( metadata.delete('start') )
       Muon::Commit.new(project_dir, metadata, Time.now, start).call
@@ -109,10 +114,11 @@ command :report do |c|
     require 'muon/report'
     require 'muon/report_table'
     require 'hirb'
+    require 'muon/muon_path_finder'
 
 
     begin
-    project_dir = Pathname.new(Dir.pwd).join(".muon") # Fix it later
+    project_dir = Muon::MuonPathFinder.new.call
     result = Muon::Report.new(project_dir, nil, nil, nil, []).call
     table  = Muon::ReportTable.new(result, []).table
     #result = Muon::Report.new(project_dir, Time.new(2013,6, 1), Time.new(2013,6,30), nil, [:ticket]).call
@@ -132,8 +138,9 @@ command :status do |c|
     require 'muon/commit'
     require 'muon/format'
     require 'muon/report'
+    require 'muon/muon_path_finder'
 
-    project_dir = Pathname.new(Dir.pwd).join(".muon") # Fix it later
+    project_dir = Muon::MuonPathFinder.new.call
     current     = Muon::Current.new(project_dir)
     # TODO: Check if initialized
     if current.tracking?
@@ -163,8 +170,9 @@ desc 'Run http server with fancy stats'
 command :server do |c|
   c.action do |global, options, arguments|
     require 'muon/report'
+    require 'muon/muon_path_finder'
 
-    project_dir = Pathname.new(Dir.pwd).join(".muon") # Fix it later
+    project_dir = Muon::MuonPathFinder.new.call
     require 'muon/server'
 
   end
@@ -174,7 +182,8 @@ desc 'Sync time entries to redmine'
 command :"2redmine" do |c|
   c.action do |global, options, arguments|
     require 'muon/2redmine'
-    project_dir = Pathname.new(Dir.pwd).join(".muon") # Fix it later
+    require 'muon/muon_path_finder'
+    project_dir = Muon::MuonPathFinder.new.call
     Muon::ToRedmine.new(project_dir).call
   end
 end

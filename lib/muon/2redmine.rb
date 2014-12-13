@@ -7,6 +7,7 @@ require 'net/https'
 
 require 'muon/report'
 require 'muon/commit'
+require 'muon/muon_path_finder'
 
 module Muon
   class ToRedmine
@@ -17,7 +18,7 @@ module Muon
     end
 
     def call
-      project_dir = Pathname.new(Dir.pwd).join(".muon") # Fix it later
+      project_dir = Muon::MuonPathFinder.new.call
       entries = Muon::Report.new(project_dir, nil, nil, nil, []).all_objects.sort_by{|e| e['start'] } # TODO: Extract
       config  = Muon::Commit.new(project_dir, nil, nil, nil).muon.config # TODO: Extract
       url = token = once = nil
