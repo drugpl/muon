@@ -106,6 +106,17 @@ command :switch do |c|
   end
 end
 
+desc 'List available branches'
+command :branch do |c|
+  c.action do |globals, options, args|
+    require 'muon/muon_path_finder'
+    require 'muon/commands/branch'
+
+    project_dir = Muon::MuonPathFinder.new.call
+    Muon::Commands::Branch.new(project_dir, globals, options, args).call
+  end
+end
+
 desc 'Display report'
 command :report do |c|
   c.desc 'Report only based on entries from today'
