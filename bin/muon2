@@ -84,18 +84,12 @@ end
 
 desc 'Stop tracking time'
 command :stop do |c|
-  c.action do |global, options, arguments|
-    
-    require 'muon/commit'
-    require 'muon/current'
+  c.action do |globals, options, args|
     require 'muon/muon_path_finder'
+    require 'muon/commands/stop'
 
     project_dir = Muon::MuonPathFinder.new.call
-    Muon::Current.new(project_dir).ephemeral do |metadata|
-      start       = Time.parse( metadata.delete('start') )
-      Muon::Commit.new(project_dir, metadata, Time.now, start).call
-    end
-
+    Muon::Commands::Stop.new(project_dir, globals, options, args).call
   end
 end
 
