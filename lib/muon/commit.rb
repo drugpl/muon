@@ -3,26 +3,10 @@ require 'pathname'
 require 'time'
 require 'multi_json'
 require 'securerandom'
+require 'muon/config_context'
 
 module Muon
   class Commit
-    class ConfigContext
-      require 'ostruct'
-
-      def config
-        @config ||= OpenStruct.new
-      end
-
-      def muon
-        self
-      end
-
-      def revenue
-        # TODO: Implement it
-        0
-      end
-    end
-
     class Error < StandardError; end
 
     attr_accessor :project_dir, :stop, :start, :metadata
@@ -88,12 +72,7 @@ module Muon
     end
 
     def muon
-      @muon ||= begin
-        context = ConfigContext.new
-        ruby    = Pathname.new(project_dir).join("config").read
-        context.instance_eval(ruby)
-        context
-      end
+      @muon ||= Muon::ConfigContext.get_config(project_dir)
     end
 
     def tracking_filename

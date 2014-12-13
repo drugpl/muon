@@ -74,7 +74,6 @@ module Muon
           entry['stop']  = Time.parse(entry['stop'])  if entry['stop']
           entry['duration'] ||= entry['stop'] - entry['start']
           entry['path'] = path.to_s
-          entry['duration'] = (entry['duration'] / 3600.0).round(3)
 
           objects << entry
         end
