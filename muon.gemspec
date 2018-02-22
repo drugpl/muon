@@ -19,7 +19,7 @@ Gem::Specification.new do |gem|
   gem.add_dependency('chronic_duration',  "= 0.9.6")
   gem.add_dependency('multi_json',        "= 1.5.0")
   gem.add_dependency('veritas',           "= 0.0.7")
-  gem.add_dependency('activesupport',     "= 3.2.11")
+  gem.add_dependency('activesupport',     "= 5.1.5")
   gem.add_dependency('sinatra',           "= 1.4.2")
   gem.add_dependency('hirb')
 
