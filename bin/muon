@@ -5,7 +5,7 @@ require 'muon'
 require 'muon/app'
 require 'gli'
 
-include GLI
+include GLI::App
 
 program_desc 'muon tracks your working time'
 version Muon::VERSION
@@ -100,4 +100,4 @@ end
 
 @app = Muon::App.new(Dir.pwd)
 
-exit GLI.run(@app.dealiasify(ARGV))
+exit run(@app.dealiasify(ARGV))
